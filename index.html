@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS — ISC Caseload Ledger</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEXUS | ISC Workbench</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <style>
   :root {
     --ink: #1B2A2E;
@@ -121,153 +122,147 @@
     background: var(--sage-bg); border: 1px dashed var(--sage); border-radius: 8px; padding: 0.9rem; margin-top: 0.75rem;
   }
   footer { text-align: center; padding: 2rem 0 1rem; font-size: 0.8rem; color: var(--ink-soft); }
-</style>
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.panel-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}.panel-header p{color:var(--ink-soft);max-width:52rem}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem}.upload-zone{display:flex;flex-direction:column;gap:.35rem;border:2px dashed var(--sage);padding:1.25rem;border-radius:var(--radius);cursor:pointer;background:var(--sage-bg);margin:.7rem 0}.upload-zone:hover{border-color:var(--teal-deep)}.callout,.ai-box{margin-top:1rem;padding:.8rem;background:var(--amber-bg);border-left:4px solid var(--amber);border-radius:4px}.ai-box{background:var(--sage-bg);border-left-color:var(--sage)}.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}.stat-card{background:var(--paper-raised);border:1px solid var(--line);padding:1rem;border-radius:var(--radius)}.stat-card span{display:block;color:var(--ink-soft);font-size:.85rem}.stat-card strong{font:600 1.8rem 'Source Serif 4',Georgia,serif;color:var(--teal-deep)}@media(max-width:720px){.two-col,.stats-grid{grid-template-columns:1fr}.panel-header{display:block}.panel-header button{margin-top:.8rem}}</style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <div class="logo">NEXUS <span>— ISC Caseload Ledger</span></div>
-    <nav>
-      <button class="nav-btn active" data-panel="dashboard">Dashboard</button>
-      <button class="nav-btn" data-panel="caseload">Caseload</button>
-      <button class="nav-btn" data-panel="tasks">Tasks &amp; Reminders</button>
-      <button class="nav-btn" data-panel="reports">Reports / Export</button>
-      <button class="nav-btn" data-panel="settings">Settings</button>
-    </nav>
-  </header>
-
-  <!-- DASHBOARD -->
-  <section id="dashboard" class="panel active">
-    <div class="grid grid-4" style="margin-bottom:1.25rem;">
-      <div class="card stat"><div class="num" id="stat-active">0</div><div class="label">Active Cases</div></div>
-      <div class="card stat"><div class="num" id="stat-high">0</div><div class="label">High Risk</div></div>
-      <div class="card stat"><div class="num" id="stat-due">0</div><div class="label">Due ≤ 7 days</div></div>
-      <div class="card stat"><div class="num" id="stat-tasks">0</div><div class="label">Open Tasks</div></div>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:0.75rem;">Upcoming Visits &amp; Deadlines</h3>
-      <div id="upcoming-list"></div>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:0.75rem;">Quick Actions</h3>
-      <div class="actions">
-        <button class="btn" onclick="openNewCaseModal()">+ New Case</button>
-        <button class="btn secondary" onclick="document.querySelector('[data-panel=caseload]').click()">View Full Caseload</button>
-        <button class="btn secondary" onclick="requestNotifPermission()">Enable Browser Notifications</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- CASELOAD -->
-  <section id="caseload" class="panel">
-    <div class="search-bar">
-      <input type="search" id="search-input" placeholder="Search name, ID, diagnosis…">
-      <select id="filter-status">
-        <option value="">All statuses</option>
-        <option value="Active">Active</option>
-        <option value="Pending">Pending</option>
-        <option value="Closed">Closed</option>
-      </select>
-      <select id="filter-risk">
-        <option value="">All risk levels</option>
-        <option value="High">High</option>
-        <option value="Medium">Medium</option>
-        <option value="Low">Low</option>
-      </select>
-      <button class="btn" onclick="openNewCaseModal()">+ New Case</button>
-    </div>
-    <div id="case-list"></div>
-  </section>
-
-  <!-- CASE DETAIL (dynamic) -->
-  <section id="case-detail" class="panel">
-    <div class="actions" style="margin-bottom:1rem;">
-      <button class="btn secondary" onclick="showPanel('caseload')">← Back to Caseload</button>
-      <button class="btn" onclick="editCurrentCase()">Edit Case</button>
-      <button class="btn secondary" onclick="exportOneCase()">Export This Case</button>
-    </div>
-    <div id="case-detail-content"></div>
-  </section>
-
-  <!-- TASKS -->
-  <section id="tasks" class="panel">
-    <div class="card">
-      <h3 style="margin-bottom:0.75rem;">Tasks &amp; Reminders</h3>
-      <div class="form-row">
-        <div><label>Task</label><input id="task-text" placeholder="e.g. Monthly visit – Jordan"></div>
-        <div><label>Due date</label><input type="date" id="task-due"></div>
-      </div>
-      <div class="form-row">
-        <div><label>Linked case (optional)</label><select id="task-case"></select></div>
-        <div style="display:flex;align-items:flex-end;"><button class="btn" onclick="addTask()">Add Task</button></div>
-      </div>
-      <div id="task-list" style="margin-top:1rem;"></div>
-    </div>
-  </section>
-
-  <!-- REPORTS -->
-  <section id="reports" class="panel">
-    <div class="card">
-      <h3>Export &amp; Reports</h3>
-      <p class="meta" style="margin:0.5rem 0 1rem;">All data lives in this browser (localStorage). Export regularly.</p>
-      <div class="actions">
-        <button class="btn" onclick="exportAllJSON()">Download Full JSON</button>
-        <button class="btn secondary" onclick="exportAllCSV()">Download Cases CSV</button>
-        <button class="btn secondary" onclick="clearAllData()">Clear All Data (irreversible)</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- SETTINGS -->
-  <section id="settings" class="panel">
-    <div class="card">
-      <h3>Settings &amp; Notes</h3>
-      <p style="margin:0.75rem 0;">This is a single-file, offline-capable ISC caseload tool. Data never leaves your device unless you export it.</p>
-      <ul style="margin:0.75rem 0 0 1.2rem; font-size:0.9rem; color:var(--ink-soft);">
-        <li>Browser notifications work when the page is open and permission is granted.</li>
-        <li>For real SMS / phone alerts, connect a service such as Twilio or a no-code tool (Make.com / Zapier) that watches an exported webhook or email.</li>
-        <li>AI helpers (summarize, draft updates) run entirely in the browser. For stronger LLM assistance, you can later add an API key to a secure backend.</li>
-        <li>Large file attachments are stored as base64 — keep them modest or clear periodically.</li>
-      </ul>
-      <div class="actions" style="margin-top:1rem;">
-        <button class="btn secondary" onclick="requestNotifPermission()">Request Notification Permission</button>
-      </div>
-    </div>
-  </section>
+<header>
+<div class="logo">NEXUS <span>— ISC Caseload Ledger</span></div>
+<nav>
+<button class="nav-btn active" data-panel="dashboard">Dashboard</button>
+<button class="nav-btn" data-panel="caseload">Caseload</button>
+<button class="nav-btn" data-panel="tasks">Tasks &amp; Reminders</button>
+<button class="nav-btn" data-panel="reports">Reports / Export</button>
+<button class="nav-btn" data-panel="settings">Settings</button>
+<button class="nav-btn" data-panel="workdesk" type="button">Work Desk</button><button class="nav-btn" data-panel="writer" type="button">AIRA Writer</button><button class="nav-btn" data-panel="finance" type="button">Finance</button></nav>
+</header>
+<!-- DASHBOARD -->
+<section class="panel active" id="dashboard">
+<div class="grid grid-4" style="margin-bottom:1.25rem;">
+<div class="card stat"><div class="num" id="stat-active">0</div><div class="label">Active Cases</div></div>
+<div class="card stat"><div class="num" id="stat-high">0</div><div class="label">High Risk</div></div>
+<div class="card stat"><div class="num" id="stat-due">0</div><div class="label">Due ≤ 7 days</div></div>
+<div class="card stat"><div class="num" id="stat-tasks">0</div><div class="label">Open Tasks</div></div>
 </div>
+<div class="card">
+<h3 style="margin-bottom:0.75rem;">Upcoming Visits &amp; Deadlines</h3>
+<div id="upcoming-list"></div>
+</div>
+<div class="card">
+<h3 style="margin-bottom:0.75rem;">Quick Actions</h3>
+<div class="actions">
+<button class="btn" onclick="openNewCaseModal()">+ New Case</button>
+<button class="btn secondary" onclick="document.querySelector('[data-panel=caseload]').click()">View Full Caseload</button>
+<button class="btn secondary" onclick="requestNotifPermission()">Enable Browser Notifications</button>
+</div>
+</div>
+</section>
+<!-- CASELOAD -->
+<section class="panel" id="caseload">
+<div class="search-bar">
+<input id="search-input" placeholder="Search name, ID, diagnosis…" type="search"/>
+<select id="filter-status">
+<option value="">All statuses</option>
+<option value="Active">Active</option>
+<option value="Pending">Pending</option>
+<option value="Closed">Closed</option>
+</select>
+<select id="filter-risk">
+<option value="">All risk levels</option>
+<option value="High">High</option>
+<option value="Medium">Medium</option>
+<option value="Low">Low</option>
+</select>
+<button class="btn" onclick="openNewCaseModal()">+ New Case</button>
+</div>
+<div id="case-list"></div>
+</section>
+<!-- CASE DETAIL (dynamic) -->
+<section class="panel" id="case-detail">
+<div class="actions" style="margin-bottom:1rem;">
+<button class="btn secondary" onclick="showPanel('caseload')">← Back to Caseload</button>
+<button class="btn" onclick="editCurrentCase()">Edit Case</button>
+<button class="btn secondary" onclick="exportOneCase()">Export This Case</button>
+</div>
+<div id="case-detail-content"></div>
+</section>
+<!-- TASKS -->
+<section class="panel" id="tasks">
+<div class="card">
+<h3 style="margin-bottom:0.75rem;">Tasks &amp; Reminders</h3>
+<div class="form-row">
+<div><label>Task</label><input id="task-text" placeholder="e.g. Monthly visit – Jordan"/></div>
+<div><label>Due date</label><input id="task-due" type="date"/></div>
+</div>
+<div class="form-row">
+<div><label>Linked case (optional)</label><select id="task-case"></select></div>
+<div style="display:flex;align-items:flex-end;"><button class="btn" onclick="addTask()">Add Task</button></div>
+</div>
+<div id="task-list" style="margin-top:1rem;"></div>
+</div>
+</section>
+<!-- REPORTS -->
+<section class="panel" id="reports">
+<div class="card">
+<h3>Export &amp; Reports</h3>
+<p class="meta" style="margin:0.5rem 0 1rem;">All data lives in this browser (localStorage). Export regularly.</p>
+<div class="actions">
+<button class="btn" onclick="exportAllJSON()">Download Full JSON</button>
+<button class="btn secondary" onclick="exportAllCSV()">Download Cases CSV</button>
+<button class="btn secondary" onclick="clearAllData()">Clear All Data (irreversible)</button>
+</div>
+</div>
+</section>
+<!-- SETTINGS -->
+<section class="panel" id="settings">
+<div class="card">
+<h3>Settings &amp; Notes</h3>
+<p style="margin:0.75rem 0;">This is a single-file, offline-capable ISC caseload tool. Data never leaves your device unless you export it.</p>
+<ul style="margin:0.75rem 0 0 1.2rem; font-size:0.9rem; color:var(--ink-soft);">
+<li>Browser notifications work when the page is open and permission is granted.</li>
+<li>For real SMS / phone alerts, connect a service such as Twilio or a no-code tool (Make.com / Zapier) that watches an exported webhook or email.</li>
+<li>AI helpers (summarize, draft updates) run entirely in the browser. For stronger LLM assistance, you can later add an API key to a secure backend.</li>
+<li>Large file attachments are stored as base64 — keep them modest or clear periodically.</li>
+</ul>
+<div class="actions" style="margin-top:1rem;">
+<button class="btn secondary" onclick="requestNotifPermission()">Request Notification Permission</button>
+</div>
+</div>
+</section>
 
+<section class="panel" id="workdesk"><div class="panel-header"><div><h2>Work Desk</h2><p>Upload a source document, extract readable text, then send it to AIRA Writer. Files are processed in this browser and are not uploaded by NEXUS.</p></div></div><div class="two-col"><div class="card"><h3>1. Add source document</h3><label class="upload-zone" for="work-file"><strong>Choose a PDF, DOCX, TXT, or image</strong><span>PDF and DOCX text can be extracted for review. Images stay as a reference file.</span></label><input accept=".pdf,.docx,.txt,.rtf,image/*" hidden="" id="work-file" type="file"/><p aria-live="polite" class="muted" id="file-status" role="status">No document selected.</p><label for="paste-source">Or paste text / rough notes</label><textarea id="paste-source" placeholder="Paste a case note, report excerpt, email, or rough bullets here." rows="10"></textarea><div class="actions"><button class="primary" onclick="NexusWork.savePaste()">Save to Work Desk</button><button onclick="NexusWork.toWriter()">Send to AIRA Writer</button></div></div><div class="card"><h3>Saved work sources</h3><p class="muted">Text is kept locally in this browser. Export a backup regularly.</p><div class="list" id="source-list"></div></div></div></section>
+<section class="panel" id="writer"><div class="panel-header"><div><h2>AIRA Writer</h2><p>Turn verified rough notes into a clear, editable first draft. Review names, dates, events, and required language before use.</p></div></div><div class="two-col"><div class="card"><label for="writer-kind">Writing task</label><select id="writer-kind"><option value="contact">Contact / support note</option><option value="status">Status update</option><option value="followup">Follow-up plan</option><option value="email">Coordination email</option><option value="plain">Plain-language rewrite</option></select><label for="writer-source">Source material</label><textarea id="writer-source" placeholder="Paste facts, bullet points, or open a saved source from Work Desk." rows="16"></textarea><div class="actions"><button class="primary" onclick="NexusWork.draft()">Create structured draft</button><button onclick="NexusWork.detailCheck()">Check key details</button></div><div class="callout" hidden="" id="detail-check"></div></div><div class="card"><h3>Editable draft</h3><textarea id="writer-output" placeholder="Your working draft appears here." rows="19"></textarea><div class="actions"><button class="primary" onclick="NexusWork.copyDraft()">Copy</button><button onclick="NexusWork.downloadDraft()">Download text</button><button onclick="NexusWork.saveDraft()">Save draft</button></div><details class="ai-box"><summary><strong>Optional on-device AI summary (beta)</strong></summary><p>Downloads a free open-source model on this device the first time. It can be slow and may not work on every phone. No key is used.</p><button onclick="NexusWork.localAI()">Generate local AI summary</button><span class="muted" id="ai-status" role="status"></span></details></div></div></section>
+<section class="panel" id="finance"><div class="panel-header"><div><h2>Financial Tracker</h2><p>Track income, reimbursements, expenses, and planning amounts. This is a personal planning tool—not a billing system.</p></div><button onclick="NexusWork.financeCSV()">Export CSV</button></div><div class="stats-grid"><div class="stat-card"><span>Income</span><strong id="fin-income">$0.00</strong></div><div class="stat-card"><span>Expenses</span><strong id="fin-expense">$0.00</strong></div><div class="stat-card"><span>Balance</span><strong id="fin-balance">$0.00</strong></div></div><div class="two-col"><div class="card"><h3>Add entry</h3><label>Description</label><input id="fin-desc" placeholder="Example: Mileage reimbursement"/><label>Type</label><select id="fin-type"><option value="income">Income / reimbursement</option><option value="expense">Expense</option></select><label>Amount</label><input id="fin-amount" min="0" placeholder="0.00" step="0.01" type="number"/><label>Date</label><input id="fin-date" type="date"/><button class="primary" onclick="NexusWork.addFinance()">Add entry</button><p class="muted">ISC unit reference: $515.67 is a planning reference only; verify current authorization and policy.</p></div><div class="card"><h3>Entries</h3><div class="list" id="finance-list"></div></div></div></section></div>
 <div class="toast" id="toast"></div>
-
 <!-- NEW / EDIT CASE MODAL -->
 <div class="modal-overlay" id="case-modal">
-  <div class="modal">
-    <h3 id="modal-title">New Case</h3>
-    <input type="hidden" id="edit-id">
-    <div class="form-row">
-      <div><label>Full name *</label><input id="c-name" required></div>
-      <div><label>Case / Medicaid ID</label><input id="c-id"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Status</label>
-        <select id="c-status"><option>Active</option><option>Pending</option><option>Closed</option></select>
-      </div>
-      <div><label>Risk level</label>
-        <select id="c-risk"><option>Low</option><option>Medium</option><option>High</option></select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div><label>DOB</label><input type="date" id="c-dob"></div>
-      <div><label>Next visit / review</label><input type="date" id="c-next"></div>
-    </div>
-    <div><label>Primary diagnosis / notes</label><textarea id="c-dx"></textarea></div>
-    <div style="margin-top:0.75rem;"><label>Guardian / key contact</label><input id="c-contact"></div>
-    <div class="actions" style="margin-top:1.25rem;">
-      <button class="btn" onclick="saveCase()">Save Case</button>
-      <button class="btn secondary" onclick="closeModal()">Cancel</button>
-    </div>
-  </div>
+<div class="modal">
+<h3 id="modal-title">New Case</h3>
+<input id="edit-id" type="hidden"/>
+<div class="form-row">
+<div><label>Full name *</label><input id="c-name" required=""/></div>
+<div><label>Case / Medicaid ID</label><input id="c-id"/></div>
 </div>
-
+<div class="form-row">
+<div><label>Status</label>
+<select id="c-status"><option>Active</option><option>Pending</option><option>Closed</option></select>
+</div>
+<div><label>Risk level</label>
+<select id="c-risk"><option>Low</option><option>Medium</option><option>High</option></select>
+</div>
+</div>
+<div class="form-row">
+<div><label>DOB</label><input id="c-dob" type="date"/></div>
+<div><label>Next visit / review</label><input id="c-next" type="date"/></div>
+</div>
+<div><label>Primary diagnosis / notes</label><textarea id="c-dx"></textarea></div>
+<div style="margin-top:0.75rem;"><label>Guardian / key contact</label><input id="c-contact"/></div>
+<div class="actions" style="margin-top:1.25rem;">
+<button class="btn" onclick="saveCase()">Save Case</button>
+<button class="btn secondary" onclick="closeModal()">Cancel</button>
+</div>
+</div>
+</div>
 <script>
 /* ========== DATA LAYER (localStorage) ========== */
 const STORAGE_KEY = 'nexus_isc_v1';
@@ -817,5 +812,7 @@ function renderAll() {
 load();
 renderAll();
 </script>
-</body>
+<script>
+document.querySelectorAll('[data-panel=workdesk],[data-panel=writer],[data-panel=finance]').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.panel)));
+window.NexusWork=(()=>{const K='nexus_workdesk_v1';let d={sources:[],drafts:[],finance:[]};try{d={...d,...JSON.parse(localStorage.getItem(K)||'{}')}}catch(e){};const $=x=>document.getElementById(x);const esc=x=>String(x||'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));const persist=()=>{localStorage.setItem(K,JSON.stringify(d));render()};const say=x=>typeof toast==='function'?toast(x):alert(x);function render(){let sources=$('source-list');if(!sources)return;sources.innerHTML=d.sources.length?d.sources.map(x=>`<div class="list-item"><strong>${esc(x.name)}</strong><br><small>${esc(x.kind)} · ${new Date(x.when).toLocaleString()}</small><br><button onclick="NexusWork.openSource('${x.id}')">Open in Writer</button> <button onclick="NexusWork.removeSource('${x.id}')">Remove</button></div>`).join(''):'<p class="muted">No saved source material yet.</p>';let inc=d.finance.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),exp=d.finance.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0),fmt=x=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(x);$('fin-income').textContent=fmt(inc);$('fin-expense').textContent=fmt(exp);$('fin-balance').textContent=fmt(inc-exp);$('finance-list').innerHTML=d.finance.length?d.finance.map(x=>`<div class="list-item"><strong>${esc(x.desc)}</strong> <span class="tag ${x.type}">${esc(x.type)}</span><br><small>${x.date} · ${fmt(x.amount)}</small><br><button onclick="NexusWork.removeFinance('${x.id}')">Remove</button></div>`).join(''):'<p class="muted">No financial entries yet.</p>'}function store(name,text,kind){if(!text.trim())return say('There was no usable text to save.');d.sources.unshift({id:crypto.randomUUID(),name,text:text.slice(0,300000),kind,when:Date.now()});persist();say('Saved locally in Work Desk.')}async function extract(file){$('file-status').textContent='Reading '+file.name+'…';let text='';try{if(/\.txt$|\.rtf$|text\//i.test(file.name+file.type)){text=await file.text()}else if(/\.docx$/i.test(file.name)){let ab=await file.arrayBuffer();let m=await import('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/+esm');text=(await m.extractRawText({arrayBuffer:ab})).value}else if(/\.pdf$/i.test(file.name)){let pdfjs=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');pdfjs.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';let pdf=await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;for(let i=1;i<=Math.min(pdf.numPages,60);i++){let c=await (await pdf.getPage(i)).getTextContent();text+=c.items.map(x=>x.str).join(' ')+'\n'}}else throw Error('Images can be saved as a reference, but need text typed or pasted for analysis.');store(file.name,text,file.name.split('.').pop().toUpperCase());$('file-status').textContent='Text extracted from '+file.name+'.'}catch(e){console.error(e);$('file-status').textContent='Could not extract text from this file. You can still paste an excerpt below.';say('Extraction was not available for this file.') }}$('work-file').addEventListener('change',e=>e.target.files[0]&&extract(e.target.files[0]));function toWriter(){let t=$('paste-source').value.trim();if(!t)return say('Paste text first.');$('writer-source').value=t;document.querySelector('[data-panel="writer"]').click()}function savePaste(){store('Pasted notes', $('paste-source').value,'Notes');$('paste-source').value=''}function openSource(id){let x=d.sources.find(x=>x.id===id);$('writer-source').value=x.text;document.querySelector('[data-panel="writer"]').click();say('Source opened in AIRA Writer.')}function removeSource(id){d.sources=d.sources.filter(x=>x.id!==id);persist()}function draft(){let t=$('writer-source').value.trim();if(!t)return say('Add source material first.');let first=t.replace(/\s+/g,' ').match(/[^.!?]+[.!?]*/g)?.slice(0,5).join(' ')||t;let m=$('writer-kind').value;let out={contact:`Contact / Support Note\n\nPurpose of contact:\n[Add purpose]\n\nVerified summary:\n${first}\n\nSupport, coordination, or action completed:\n[Add what was completed]\n\nPlan / next contact:\n• [Action]\n• [Owner and date]`,status:`Status Update — ${new Date().toLocaleDateString()}\n\n${first}\n\nCurrent status:\n[Confirm progress, needs, barriers, and supports]\n\nNext steps:\n• [Action]\n• [Due date]`,followup:`Follow-Up Plan\n\nReason:\n${first}\n\nActions:\n1. [Action / owner]\n2. [Action / owner]\n\nTarget date: [Date]\nEscalation needed: [Yes / No]`,email:`Subject: Coordination Follow-Up\n\nHello,\n\nI am following up regarding: ${first}\n\nPlease share any updates or let me know the best next step.\n\nThank you,\n[Your name]`,plain:`Plain-Language Version\n\n${first}\n\nWhat happens next:\n• [First step]\n• [Who will help]\n• [When to expect an update]`};$('writer-output').value=out[m];say('Structured draft created. Review it before use.')}function detailCheck(){let t=$('writer-source').value.trim();if(!t)return say('Add source material first.');let dates=t.match(/\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2}/gi)||[];$('detail-check').hidden=false;$('detail-check').innerHTML=`<strong>Detail check</strong><br>${t.split(/[.!?]+/).filter(Boolean).length} statements found.${dates.length?' Possible dates: '+esc(dates.slice(0,5).join(', '))+'.':' Add dates where they matter.'} Confirm identity, events, actions, risk, and required documentation language.`}async function localAI(){let t=$('writer-source').value.trim();if(!t)return say('Add source material first.');let st=$('ai-status');st.textContent='Loading the local model…';try{let{pipeline}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2');let f=await pipeline('summarization','Xenova/distilbart-cnn-6-6');st.textContent='Creating summary…';let r=await f(t.slice(0,6000),{max_new_tokens:130});$('writer-output').value='Local AI Summary\n\n'+r[0].summary_text;st.textContent='Done — generated on this device.'}catch(e){console.error(e);st.textContent='This device could not load the local model. The regular writer remains available.'}}function copyDraft(){navigator.clipboard.writeText($('writer-output').value).then(()=>say('Draft copied.')).catch(()=>say('Select the draft and copy it manually.'))}function downloadDraft(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$ ('writer-output').value],{type:'text/plain'}));a.download='nexus-draft.txt';a.click()}function saveDraft(){let t=$('writer-output').value.trim();if(!t)return say('No draft to save.');d.drafts.unshift({id:crypto.randomUUID(),text:t,when:Date.now()});persist();say('Draft saved locally.')}function addFinance(){let desc=$('fin-desc').value.trim(),amount=Number($('fin-amount').value);if(!desc||!amount||amount<0)return say('Add a description and valid amount.');d.finance.unshift({id:crypto.randomUUID(),desc,amount,type:$('fin-type').value,date:$('fin-date').value||new Date().toISOString().slice(0,10)});$('fin-desc').value='';$('fin-amount').value='';persist();say('Financial entry saved.')}function removeFinance(id){d.finance=d.finance.filter(x=>x.id!==id);persist()}function financeCSV(){let q=x=>'"'+String(x).replaceAll('"','""')+'"',rows=[['Date','Description','Type','Amount'],...d.finance.map(x=>[x.date,x.desc,x.type,x.amount])];let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(x=>x.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='nexus-finance.csv';a.click()}render();return{savePaste,toWriter,openSource,removeSource,draft,detailCheck,localAI,copyDraft,downloadDraft,saveDraft,addFinance,removeFinance,financeCSV}})();</script></body>
 </html>
