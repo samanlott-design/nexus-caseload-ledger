@@ -416,8 +416,10 @@ function openCase(id) {
       <textarea id="new-note" placeholder="Write or paste a note, contact summary, or update…"></textarea>
       <div class="actions" style="margin-top:0.5rem;">
         <button class="btn" onclick="addNote('${c.id}')">Save Note</button>
-        <button class="btn secondary" onclick="aiSummarize()">Summarize text above</button>
+        <button class="btn secondary" onclick="aiSummarize()">Quick summary</button>
+        <button class="btn secondary" onclick="localAISummarize()">Local AI summary</button>
         <button class="btn secondary" onclick="aiDraftUpdate()">Draft status update</button>
+        <p class="meta" style="margin-top:0.5rem;">Local AI runs in this browser. The first use downloads a free open-source model; no account or API key is needed.</p>
       </div>
       <div class="ai-box hidden" id="ai-output"></div>
       <div style="margin-top:1rem;" id="notes-list">
@@ -587,6 +589,7 @@ function handleFiles(cid) {
   if (!c.docs) c.docs = [];
   let pending = files.length;
   files.forEach(f => {
+    if (f.size > 4 * 1024 * 1024) { toast(f.name + ' is over the 4 MB browser-storage limit'); pending--; return; }
     const reader = new FileReader();
     reader.onload = e => {
       c.docs.push({
@@ -655,6 +658,31 @@ function aiSummarize() {
     ${actions.length ? `<strong>Possible action items</strong><ul> ${actions.map(a=>'<li>'+a+'</li>').join('')}</ul>` : ''}
     <button class="btn sm" onclick="navigator.clipboard.writeText(document.getElementById('ai-output').innerText)">Copy</button>`;
 }
+let localAIModel = null;
+async function localAISummarize() {
+  const text = document.getElementById('new-note').value.trim();
+  if (!text) { toast('Paste or type text first'); return; }
+  const out = document.getElementById('ai-output');
+  out.classList.remove('hidden');
+  out.innerHTML = '<strong>Loading Local AI…</strong><p>This first use may take a few minutes while the free model downloads to this browser. Keep this page open.</p>';
+  try {
+    if (!localAIModel) {
+      const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2');
+      env.allowLocalModels = false;
+      localAIModel = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+    }
+    const source = text.length > 6000 ? text.slice(0,6000) : text;
+    const result = await localAIModel(source, { max_new_tokens: 150, min_new_tokens: 35 });
+    const summary = result[0]?.summary_text || 'No summary was returned.';
+    out.innerHTML = `<strong>Local AI summary</strong><p>${esc(summary)}</p><p class="meta">Review all details, dates, names, and required clinical language before use. This summary is created on this device.</p><button class="btn sm" onclick="navigator.clipboard.writeText(document.getElementById('ai-output').innerText)">Copy</button>`;
+    toast('Local AI summary ready');
+  } catch (error) {
+    console.error(error);
+    out.innerHTML = '<strong>Local AI could not start</strong><p>Use Quick summary instead, or try again on a desktop browser with a steady connection. Your note was not sent to an AI service.</p>';
+    toast('Local AI unavailable in this browser');
+  }
+}
+
 function aiDraftUpdate() {
   const text = document.getElementById('new-note').value.trim() || 'Recent contact completed.';
   const c = state.cases.find(x => x.id === currentCaseId);
